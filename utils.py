@@ -65,7 +65,7 @@ def isoformat_zulu(dt: datetime.datetime) -> str:
     :param dt: The datetime to format
     :return: The ISO-8601 formatted string
     """
-    if dt.tzinfo is None:
+    if not hasattr(dt, "tzinfo") or dt.tzinfo is None:
         return dt.isoformat() + "Z"
     elif dt.tzinfo.utcoffset(dt) == datetime.timedelta(0):
         return dt.replace(tzinfo=None).isoformat() + "Z"
