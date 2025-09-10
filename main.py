@@ -1,4 +1,5 @@
 import logging
+import datetime
 from serial.tools.list_ports_linux import comports
 from starlette.responses import HTMLResponse
 
@@ -171,7 +172,8 @@ async def get_sensor_for_specific_project(project: ProjectName, sensor_name: str
     if not isinstance(s.readings, list):
         s.readings = [s.readings]
     for reading in s.readings:
-        reading.time = isoformat_zulu(reading.time)
+        if isinstance(reading.time, datetime.datetime):
+            reading.time = isoformat_zulu(reading.time)
 
     return CanonicalResponse(
         value={
