@@ -33,13 +33,14 @@ class OutsideArduino(SerialStation, Arduino):
         self.cfg = cfg.toml['stations']['outside-arduino']
         self.interval = cfg.station_settings[self.name].interval
         self.db_manager = make_db_manager()
+        self.port = None
 
     def detect(self, serial_ports: List[str]) -> List[str]:
         ret = serial_ports
         for serial_port in serial_ports:
             with serial.Serial(port=serial_port, baudrate=self.cfg['baud'], timeout=2) as ser:
                 #
-                # The inside Arduino probe protocol:
+                # The outside Arduino probe protocol:
                 # - send: id?
                 # - get:  Running /home/enrico/Eran/LAST/LAST_EnvironmentArduinoSensors/sketches/Outdoor_multiQuery/Outdoor_multiQuery.ino, Built Nov  4 2021
                 #
@@ -68,13 +69,16 @@ class OutsideArduino(SerialStation, Arduino):
     def fetcher(self) -> None:
         # print(f"{self.name}: fetcher is bypassed")
         # return
+        if not self.port:
+            logger.warning(f"{self.name}: no serial port")
+            return
+        
         reading: OutsideArduinoReading = OutsideArduinoReading()
         try:
             self.ser = serial.Serial(port=self.port, baudrate=self.baud,
                                      timeout=self.timeout, write_timeout=self.write_timeout)
-        except serial.SerialException as ex:
+        except Exception as ex:
             logger.error(f"Could not open '{self.port}", exc_info=ex)
-            self.ser.close()
             return
 
         try:
