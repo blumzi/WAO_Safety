@@ -49,7 +49,7 @@ class HttpStationSettings(StationSettings):
     def __init__(self, d):
         super().__init__(d)
         self.host = d['host']
-        self.port = int(d['port'])
+        self.port = int(d['port']) if "port" in d else None
 
 
 class StationConfig:
