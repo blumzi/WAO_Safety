@@ -23,6 +23,7 @@
         "outside-ardino",  # Outside Arduino
         "cyclope",          # The Cyclope seeing monitor
         "tessw",            # The TESS-W cloud-cover monitor
+        "ims232",           # Israeli Meteorological Service, station #232, Neot Smadar
         "internal",         # A station that performs internal calculations
     ]
 
@@ -89,6 +90,13 @@
 [stations.tessw]
     datums = ["cover"]
     host = "192.168.4.1"
+    port = 80
+    interval = 60
+    enabled = true
+
+[stations.ims232]
+    datums = ["wind_speed", "wind_direction", "temperature", "relative_humidity", "rain_rate"]
+    host = "api.ims.gov.il"
     port = 80
     interval = 60
     enabled = true

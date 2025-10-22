@@ -10,12 +10,14 @@ from utils import VantageProReading, VantageProDatum
 from utils import InsideArduinoReading, InsideArduinoDatum
 from utils import OutsideArduinoReading, OutsideArduinoDatum
 from utils import TessWReading, TessWDatum
+from utils import ImsDatum, ImsReading
 
 Base = None
 DavisDbClass = None
 ArduinoInDbClass = None
 ArduinoOutDbClass = None
 TessWDbClass = None
+Ims232DbClass = None
 
 
 class DbManager:
@@ -44,11 +46,12 @@ class DbManager:
         self.ArduinoIn = None
         self.Vantage = None
         self.TessW = None
+        self.Ims232 = None
         self.Base = None
         self._initialized = True
 
     def connect(self):
-        global Base, DavisDbClass, ArduinoInDbClass, ArduinoOutDbClass, TessWDbClass
+        global Base, DavisDbClass, ArduinoInDbClass, ArduinoOutDbClass, TessWDbClass, Ims232DbClass
 
         self.engine = create_engine(self.url, echo=False)
         self.session_factory = sessionmaker(bind=self.engine)
@@ -60,6 +63,7 @@ class DbManager:
         ArduinoInDbClass = Base.classes.arduino_in
         ArduinoOutDbClass = Base.classes.arduino_out
         TessWDbClass = Base.classes.tessw
+        Ims232DbClass = Base.classes.ims232
 
     def disconnect(self):
         if self.engine is not None:
@@ -130,6 +134,19 @@ class DbManager:
         )
 
         self.session.add(tessw)
+        self.session.commit()
+
+    def write_ims232_measurement(self, reading: ImsReading):
+        ims232 = Ims232DbClass(
+            temp=reading.datum[ImsDatum.Temperature],
+            humidity=reading.datum[ImsDatum.Humidity],
+            wind_speed=reading.datum[ImsDatum.WindSpeed],
+            wind_direction=reading.datum[ImsDatum.WindDirection],
+            rain=reading.datum[ImsDatum.RainRate],
+            tstamp=reading.tstamp
+        )
+
+        self.session.add(ims232)
         self.session.commit()
 
 

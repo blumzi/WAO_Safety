@@ -21,6 +21,7 @@ from inside_arduino import InsideArduino
 from outside_arduino import OutsideArduino
 from cyclope import Cyclope
 from tessw import TessW
+from ims import Ims
 
 from config.config import make_cfg, Config
 from utils import ExtendedJSONResponse, SafetyResponse
@@ -42,6 +43,7 @@ name_to_class = {
     'outside-arduino': OutsideArduino,
     'cyclope': Cyclope,
     'tessw': TessW,
+    'ims232': Ims,
 }
 
 

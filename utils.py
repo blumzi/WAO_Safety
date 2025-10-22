@@ -147,6 +147,23 @@ class Reading:
         self.datums = dict()
 
 
+class ImsDatum(str, Enum):
+    WindDirection = "wind_direction"
+    WindSpeed = "wind_speed"
+    Humidity = "humidity"
+    RainRate = "rain_rate"
+    Temperature = "temperature"
+
+    @classmethod
+    def datums(cls):
+        return [item.value for item in cls]
+
+class ImsReading(Reading):
+    def __init__(self):
+        super().__init__()
+        for name in ImsDatum.datums():
+            self.datums[name] = None
+
 class VantageProDatum(str, Enum):
     Barometer = "barometer",
     InsideTemperature = "inside_temperature",
