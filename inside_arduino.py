@@ -89,14 +89,14 @@ class InsideArduino(SerialStation, Arduino):
             self.get_presence(reading)
             self.get_light(reading)
             self.ser.close()
-            logger.info(f"got sensor readings")
+            logger.info(f"got reading {reading.datums=}")
         except Exception as ex:
             logger.error(f"fetcher: Failed", exc_info=ex)
             self.ser.close()
             raise
 
         reading.tstamp = datetime.datetime.utcnow()
-        # logger.debug(f"reading: {reading.__dict__}")
+        
         with self.lock:
             self.readings.push(reading)
         if hasattr(self, 'saver'):
