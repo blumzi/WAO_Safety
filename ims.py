@@ -51,7 +51,7 @@ class Ims(IPStation):
                 url=url,
                 # proxies={},
                 # trust_env=False,
-                timeout=10,
+                timeout=20,
                 headers={
                     "Content-Type": "application/json; charset=utf-8",
                     "Authorization": "ApiToken 1a901e45-9028-44ff-bd2c-35e82407fb9b"
@@ -93,7 +93,7 @@ class Ims(IPStation):
             self.saver(reading)
 
     def latest_readings(self, datum: str, n: int = 1) -> list:
-        return self.readings[:n] if n < len(self.readings) else self.readings
+        return self.readings[-n:] if n < len(self.readings) else self.readings
 
     def saver(self, reading: ImsReading) -> None:
         from db_access import Ims232DbClass
