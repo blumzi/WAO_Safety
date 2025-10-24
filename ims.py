@@ -49,8 +49,7 @@ class Ims(IPStation):
             response = httpx.request(
                 method="GET",
                 url=url,
-                # proxies={},
-                # trust_env=False,
+                proxy="http://bcproxy.weizmann.ac.il:8080",
                 timeout=20,
                 headers={
                     "Content-Type": "application/json; charset=utf-8",
