@@ -12,15 +12,17 @@ if [ ${#} -ne 1 ]; then
     exit 1
 fi
 
+# set -x
 case ${1} in
     start)
-      cd ~/python/WAO_Safety
+      cd ~ocs/python/WAO_Safety
       source venv/bin/activate
-      python3 ${OPTIONS} ~/python/WAO_Safety/main.py >/dev/null 2>&1
+      python3 ${OPTIONS} ~ocs/python/WAO_Safety/main.py >/dev/null 2>&1
       ;;
 
     stop)
       pkill -9 -f WAO_Safety/main.py
+      exit 0
       ;;
 
     status)
