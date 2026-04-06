@@ -9,7 +9,7 @@ from init_log import config_logging
 logging.basicConfig(level=logging.WARNING)
 
 import argparse
-from typing import Dict, Any
+from typing import Dict, Any, Tuple, List
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -148,6 +148,8 @@ async def get_sensors_for_specific_project(project: ProjectName) -> CanonicalRes
         if not isinstance(readings, list):
             readings = [readings]
         for reading in readings:
+            if not isinstance(reading.time, datetime.datetime):
+                raise Exception(f"bad reading.time: {project_name=}, {sensor=}")
             reading.time = isoformat_zulu(reading.time)
 
     return CanonicalResponse(value={
@@ -184,17 +186,35 @@ async def get_sensor_for_specific_project(project: ProjectName, sensor_name: str
             "interval": station.interval,
         })
 
+def is_safe(project: str) -> Tuple[bool, List[str]]:
+    if project is None:
+        project = 'default'
+
+    for station in stations:
+        if hasattr(station, 'calculate_sensors'):
+            station.calculate_sensors()
+
+    safe = True
+    reasons = []
+    for sensor in cfg.sensors[project]:
+        if not sensor.safe:
+            safe = False
+            for reason in sensor.reasons_for_not_safe:
+                reasons.append(reason)
+    return (safe, reasons)
 
 @app.get("/{project}/is_safe", tags=["safety"], response_class=ExtendedJSONResponse)
 async def get_project_specific_status(project: ProjectName) -> CanonicalResponse:
-    name = str(project).replace('ProjectName.', '')
 
-    return CanonicalResponse(value=is_safe(name))
+    project_name = str(project).replace('ProjectName.', '')
+    safe, reasons = is_safe(project_name)
+    return CanonicalResponse(value=SafetyResponse(safe=safe, reasons=reasons))
 
 
 @app.get("/is_safe", tags=["safety"], response_class=ExtendedJSONResponse)
 async def get_global_status() -> CanonicalResponse:
-    return CanonicalResponse(value=is_safe('default'))
+    safe, reasons = is_safe("default")
+    return CanonicalResponse(value=SafetyResponse(safe=safe, reasons=reasons))
 
 
 @app.get("/human-intervention/create", tags=["human-intervention"])
@@ -266,21 +286,6 @@ async def help():
     """
     return HTMLResponse(content=content, status_code=200)
 
-def is_safe(project: str) -> CanonicalResponse:
-    if project is None:
-        project = 'default'
-
-    for station in stations:
-        if hasattr(station, 'calculate_sensors'):
-            station.calculate_sensors()
-
-    ret = SafetyResponse()
-    for sensor in cfg.sensors[project]:
-        if not sensor.safe:
-            ret.safe = False
-            for reason in sensor.reasons_for_not_safe:
-                ret.reasons.append(reason)
-    return CanonicalResponse(value=ret)
 
 
 if __name__ == "__main__":
